@@ -9,7 +9,7 @@ using System.Security;
 [assembly: AssemblyTitle("NPOI OpenXml4Net")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("Neuzilla")]
+[assembly: AssemblyCompany("Nissl")]
 [assembly: AssemblyProduct("NPOI")]
 [assembly: AssemblyCopyright("Apache 2.0")]
 [assembly: AssemblyTrademark("NPOI")]
@@ -33,12 +33,12 @@ using System.Security;
 // You can specify all the values or you can default the Build and Revision Numbers 
 // by using the '*' as shown below:
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("2.5.1.0")]
-[assembly: AssemblyFileVersion("2.5.1.0")]
+[assembly: AssemblyVersion("2.5.2.0")]
+[assembly: AssemblyFileVersion("2.5.2.0")]
 [assembly: AssemblyInformationalVersion("2.0.0.0")]
-#if NETSTANDARD2_0 || NET40
+#if NETSTANDARD2_1 || NETSTANDARD2_0 || NET40
 [assembly: AllowPartiallyTrustedCallers]
 #endif
-#if NETSTANDARD2_0 || NET40 || NET45
+#if NETSTANDARD2_1 || NETSTANDARD2_0 || NET40 || NET45
 [assembly: SecurityRules(SecurityRuleSet.Level1)]
 #endif

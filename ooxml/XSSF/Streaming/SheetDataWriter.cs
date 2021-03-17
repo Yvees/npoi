@@ -35,7 +35,7 @@ namespace NPOI.XSSF.Streaming
         protected Stream OutputStream { get; private set; }
         private int RowNum { get; set; }
         public int NumberOfFlushedRows { get; set; }
-        public int LowestIndexOfFlushedRows { get; set; } // meaningful only of _numberOfFlushedRows>0
+        public int LowestIndexOfFlushedRows { get; set; } = -1; // meaningful only of _numberOfFlushedRows>0
         public int NumberOfCellsOfLastFlushedRow { get; set; } // meaningful only of _numberOfFlushedRows>0
         public int NumberLastFlushedRow = -1; // meaningful only of _numberOfFlushedRows>0
 
@@ -192,7 +192,8 @@ namespace NPOI.XSSF.Streaming
         public void WriteRow(int rownum, SXSSFRow row)
         {
             BeginRow(rownum, row);
-            using (var cells = row.GetEnumerator())
+            
+            using (var cells = row.AllCellsIterator())
             {
                 int columnIndex = 0;
                 while (cells.MoveNext())
@@ -201,18 +202,19 @@ namespace NPOI.XSSF.Streaming
                 }
                 EndRow();
             }
+            
+            if (LowestIndexOfFlushedRows == -1 || LowestIndexOfFlushedRows > rownum)
+            {
+                LowestIndexOfFlushedRows = rownum;
+                NumberOfFlushedRows++;
+            }
         }
 
         public void FlushRows(int rowCount, int lastRowNum, int lastRowCellsCount)
         {
-            if (NumberOfFlushedRows == 0)
-            {
-                LowestIndexOfFlushedRows = lastRowNum;
-            }
 
             NumberLastFlushedRow = Math.Max(lastRowNum, NumberLastFlushedRow);
             NumberOfCellsOfLastFlushedRow = lastRowCellsCount;
-            NumberOfFlushedRows += rowCount;
 
             _outputWriter.Flush();
             OutputStream.Flush();
@@ -331,7 +333,7 @@ namespace NPOI.XSSF.Streaming
                             int sRef = _sharedStringSource.AddEntry(rt.GetCTRst());
 
                             WriteAsBytes(" t=\"");
-                            WriteAsBytes(nameof(ST_CellType.s));
+                            WriteAsBytes("s");
                             WriteAsBytes("\">");
                             WriteAsBytes("<v>");
                             WriteAsBytes(sRef);
