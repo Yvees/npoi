@@ -181,6 +181,8 @@ namespace NPOI.SS.Formula.Atp {
             r(m, "YIELD", null);
             r(m, "YIELDDISC", null);
             r(m, "YIELDMAT", null);
+            r(m, "STDEV.P", STDEV_P.Instance);
+
             return m;
         }
 
