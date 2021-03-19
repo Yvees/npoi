@@ -285,7 +285,7 @@ namespace NPOI.SS.Formula.Eval
             retval[190] = LogicalFunction.ISNONTEXT; // IsNONTEXT
             retval[191] = new NotImplementedFunction("GetNOTE"); // GetNOTE
             retval[192] = new NotImplementedFunction("NOTE"); // NOTE
-            retval[193] = new NotImplementedFunction("STDEVP"); // STDEVP
+            retval[193] = AggregateFunction.STDEVP; // STDEVP
             retval[194] = AggregateFunction.VARP; // VARP
             retval[195] = new NotImplementedFunction("DSTDEVP"); // DSTDEVP
             retval[196] = new NotImplementedFunction("DVARP"); // DVARP

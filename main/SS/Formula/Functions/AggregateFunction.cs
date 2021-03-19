@@ -120,6 +120,17 @@ namespace NPOI.SS.Formula.Functions
             return StatsLib.stdev(values);
         }
     }
+    public class STDEVP : AggregateFunction
+    {
+        protected internal override double Evaluate(double[] values)
+        {
+            if (values.Length < 1)
+            {
+                throw new EvaluationException(ErrorEval.DIV_ZERO);
+            }
+            return StatsLib.stdevp(values);
+        }
+    }
     public class SUMSQ : AggregateFunction
     {
         protected internal override double Evaluate(double[] values)
@@ -346,6 +357,7 @@ namespace NPOI.SS.Formula.Functions
         public static readonly Function PRODUCT = new PRODUCT();
         public static readonly Function SMALL = new SMALL();
         public static readonly Function STDEV = new STDEV();
+        public static readonly Function STDEVP = new STDEVP();
         public static readonly Function SUM = new SUM();
         public static readonly Function SUMSQ = new SUMSQ();
         public static readonly Function VAR = new VAR();

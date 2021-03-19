@@ -66,6 +66,27 @@ namespace NPOI.SS.Formula.Functions
             }
             return r;
         }
+        public static double stdevp(double[] v)
+        {
+            double r = double.NaN;
+            if (v != null && v.Length > 1)
+            {
+                double dSum = 0.0;
+                for (int i = 0; i < v.Length; ++i)
+                {
+                    dSum += v[i];
+                }
+                double dAverage = dSum / v.Length;
+
+                dSum = 0.0;
+                for (int i = 0; i < v.Length; ++i)
+                {
+                    dSum += (v[i] - dAverage) * (v[i] - dAverage);
+                }
+                r = Math.Sqrt(dSum / v.Length);
+            }
+            return r;
+        }
         public static double var(double[] v)
         {
             double r = Double.NaN;
