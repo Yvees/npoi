@@ -768,15 +768,23 @@ namespace NPOI.SS.Formula.Functions
         }
         public CompareResult CompareTo(ValueEval other)
         {
-            if (other == null)
+            try
             {
-                throw new Exception("Compare to value cannot be null");
+                if (other == null)
+                {
+                    throw new Exception("Compare to value cannot be null");
+                }
+                if (_targetType != other.GetType())
+                {
+                    return CompareResult.TypeMismatch;
+                }
+                return CompareSameType(other);
             }
-            if (_targetType != other.GetType())
+            catch (Exception ex)
             {
-                return CompareResult.TypeMismatch;
+                throw new EvaluationException(ErrorEval.NA);
             }
-            return CompareSameType(other);
+
         }
         public override String ToString()
         {
