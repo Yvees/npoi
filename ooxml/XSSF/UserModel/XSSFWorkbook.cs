@@ -306,6 +306,12 @@ namespace NPOI.XSSF.UserModel
 
         }
 
+        public XSSFWorkbook(String path, bool readOnly)
+            : this(OpenPackage(path, readOnly))
+        {
+
+        }
+
         protected void BeforeDocumentRead()
         {
             // Ensure it isn't a XLSB file, which we don't support

@@ -147,6 +147,7 @@ namespace NPOI.OpenXml4Net.OPC
         {
             return Open(path, defaultPackageAccess);
         }
+
         /**
         * Open a package with read/write permission.
         *

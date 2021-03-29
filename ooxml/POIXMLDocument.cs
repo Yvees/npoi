@@ -80,6 +80,18 @@ namespace NPOI
             }
         }
 
+        public static OPCPackage OpenPackage(String path, bool readOnly)
+        {
+            try
+            {
+                return OPCPackage.Open(path, readOnly ? PackageAccess.READ : PackageAccess.READ_WRITE);
+            }
+            catch (InvalidFormatException e)
+            {
+                throw new IOException(e.ToString());
+            }
+        }
+
         public OPCPackage Package
         {
             get
