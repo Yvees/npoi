@@ -9,14 +9,16 @@ namespace NPOI.SS.Formula
     using NPOI.SS.Formula;
     using NPOI.SS.Formula.PTG;
     using System.Globalization;
+    using NPOI.SS.Formula.Constant;
+
     /**
-     * Contains all the contextual information required to Evaluate an operation
-     * within a formula
-     *
-     * For POI internal use only
-     *
-     * @author Josh Micich
-     */
+* Contains all the contextual information required to Evaluate an operation
+* within a formula
+*
+* For POI internal use only
+*
+* @author Josh Micich
+*/
     public class OperationEvaluationContext
     {
         public static readonly FreeRefFunction UDF = UserDefinedFunction.instance;
@@ -367,6 +369,47 @@ namespace NPOI.SS.Formula
             return new LazyAreaEval(aptg.FirstRow, aptg.FirstColumn,
                     aptg.LastRow, aptg.LastColumn, sre);
         }
+        public ValueEval GetAreaValueEval(int firstRowIndex, int firstColumnIndex,
+            int lastRowIndex, int lastColumnIndex, Object[][] tokens)
+        {
+
+            ValueEval[] values = new ValueEval[tokens.Length * tokens[0].Length];
+
+            int index = 0;
+            for (int i = 0; i < tokens.Length; i++)
+            {
+                Object[] token = tokens[i];
+                for (int idx = 0; idx < tokens[0].Length; idx++)
+                {
+                    values[index++] = convertObjectEval(token[idx]);
+                }
+            }
+
+            return new CacheAreaEval(firstRowIndex, firstColumnIndex, lastRowIndex,
+                                     lastColumnIndex, values);
+        }
+
+        private ValueEval convertObjectEval(Object token)
+        {
+            if (token == null)
+            {
+                throw new RuntimeException("Array item cannot be null");
+            }
+            if (token is String) {
+                return new StringEval((String)token);
+            }
+            if (token is Double) {
+                return new NumberEval((Double)token);
+            }
+            if (token is Boolean) {
+                return BoolEval.ValueOf((Boolean)token);
+            }
+            if (token is ErrorConstant) {
+                return ErrorEval.ValueOf(((ErrorConstant)token).ErrorCode);
+            }
+            throw new ArgumentException("Unexpected constant class (" + token.GetType().Name + ")");
+        }
+
         public ValueEval GetNameXEval(NameXPtg nameXPtg)
         {
             ExternalSheet externSheet = _workbook.GetExternalSheet(nameXPtg.SheetRefIndex);

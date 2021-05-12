@@ -759,7 +759,7 @@ namespace NPOI.SS.Formula
             if (ptg is ArrayPtg) 
             {
                 ArrayPtg aptg = (ArrayPtg)ptg;
-                return ec.GetAreaEval(0, 0, aptg.RowCount - 1, aptg.ColumnCount - 1);
+                return ec.GetAreaValueEval(0, 0, aptg.RowCount - 1, aptg.ColumnCount - 1, aptg.GetTokenArrayValues());
             }
 
             if (ptg is UnknownPtg)

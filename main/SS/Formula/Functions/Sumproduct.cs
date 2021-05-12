@@ -236,39 +236,46 @@ namespace NPOI.SS.Formula.Functions
          */
         private static double GetProductTerm(ValueEval ve, bool IsScalarProduct)
         {
-
-            if (ve is BlankEval || ve == null)
+            try
             {
-                // TODO - shouldn't BlankEval.INSTANCE be used always instead of null?
-                // null seems to occur when the blank cell Is part of an area ref (but not reliably)
-                if (IsScalarProduct)
+                if (ve is BlankEval || ve == null)
                 {
-                    throw new EvaluationException(ErrorEval.VALUE_INVALID);
+                    // TODO - shouldn't BlankEval.INSTANCE be used always instead of null?
+                    // null seems to occur when the blank cell Is part of an area ref (but not reliably)
+                    if (IsScalarProduct)
+                    {
+                        throw new EvaluationException(ErrorEval.VALUE_INVALID);
+                    }
+                    return 0;
                 }
-                return 0;
-            }
 
-            if (ve is ErrorEval)
-            {
-                throw new EvaluationException((ErrorEval)ve);
-            }
-            if (ve is StringEval)
-            {
-                if (IsScalarProduct)
+                if (ve is ErrorEval)
                 {
-                    throw new EvaluationException(ErrorEval.VALUE_INVALID);
+                    throw new EvaluationException((ErrorEval)ve);
                 }
-                // Note for area SUMPRODUCTs, string values are interpreted as zero
-                // even if they would Parse as valid numeric values
-                return 0;
+                if (ve is StringEval)
+                {
+                    if (IsScalarProduct)
+                    {
+                        throw new EvaluationException(ErrorEval.VALUE_INVALID);
+                    }
+                    // Note for area SUMPRODUCTs, string values are interpreted as zero
+                    // even if they would Parse as valid numeric values
+                    return 0;
+                }
+                if (ve is NumericValueEval)
+                {
+                    NumericValueEval nve = (NumericValueEval)ve;
+                    return nve.NumberValue;
+                }
+                throw new RuntimeException("Unexpected value eval class ("
+                        + ve.GetType().Name + ")");
             }
-            if (ve is NumericValueEval)
+            catch (Exception ex)
             {
-                NumericValueEval nve = (NumericValueEval)ve;
-                return nve.NumberValue;
+                throw ex;
             }
-            throw new RuntimeException("Unexpected value eval class ("
-                    + ve.GetType().Name + ")");
+            
         }
     }
 }
