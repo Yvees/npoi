@@ -18,6 +18,7 @@
 using NPOI.SS.Formula;
 using NPOI.SS.UserModel;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 
 namespace NPOI.XSSF.UserModel
@@ -32,7 +33,7 @@ namespace NPOI.XSSF.UserModel
     {
 
         private XSSFSheet _xs;
-        private Dictionary<CellKey, IEvaluationCell> _cellCache;
+        private ConcurrentDictionary<CellKey, IEvaluationCell> _cellCache;
 
         public XSSFEvaluationSheet(ISheet sheet)
         {
@@ -58,7 +59,7 @@ namespace NPOI.XSSF.UserModel
             // cache for performance: ~30% speedup due to caching
             if (_cellCache == null)
             {
-                _cellCache = new Dictionary<CellKey, IEvaluationCell>(_xs.LastRowNum * 3);
+                _cellCache = new ConcurrentDictionary<CellKey, IEvaluationCell>(Environment.ProcessorCount, _xs.LastRowNum * 3);
                 foreach (IRow row in _xs)
                 {
                     int rowNum = row.RowNum;
@@ -67,7 +68,7 @@ namespace NPOI.XSSF.UserModel
                         // cast is safe, the iterator is just defined using the interface
                         CellKey key1 = new CellKey(rowNum, cell.ColumnIndex);
                         IEvaluationCell evalcell1 = new XSSFEvaluationCell((XSSFCell)cell, this);
-                        _cellCache.Add(key1, evalcell1);
+                        _cellCache[key1] = evalcell1;
                     }
                 }
             }

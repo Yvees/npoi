@@ -18,6 +18,7 @@
 namespace NPOI.SS.Formula.UDF
 {
     using System;
+    using System.Collections.Concurrent;
     using System.Collections.Generic;
     using NPOI.SS.Formula.Functions;
     /**
@@ -27,13 +28,13 @@ namespace NPOI.SS.Formula.UDF
      */
     public class IndexedUDFFinder : AggregatingUDFFinder
     {
-        private Dictionary<int, String> _funcMap;
+        private ConcurrentDictionary<int, String> _funcMap;
 
         public IndexedUDFFinder(params UDFFinder[] usedToolPacks)
             : base(usedToolPacks)
         {
 
-            _funcMap = new Dictionary<int, String>();
+            _funcMap = new ConcurrentDictionary<int, String>();
         }
 
         public override FreeRefFunction FindFunction(String name)

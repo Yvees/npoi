@@ -32,6 +32,7 @@ namespace NPOI.SS.Formula
     using NPOI.SS.Formula.PTG;
     using NPOI.Util;
     using NPOI.SS.Formula.Function;
+    using System.Collections.Concurrent;
 
     /**
      * Evaluates formula cells.<p/>
@@ -52,7 +53,7 @@ namespace NPOI.SS.Formula
         private int _workbookIx;
 
         private IEvaluationListener _evaluationListener;
-        private Dictionary<IEvaluationSheet, int> _sheetIndexesBySheet;
+        private ConcurrentDictionary<IEvaluationSheet, int> _sheetIndexesBySheet;
         private Dictionary<String, int> _sheetIndexesByName;
         private CollaboratingWorkbooksEnvironment _collaboratingWorkbookEnvironment;
         private IStabilityClassifier _stabilityClassifier;
@@ -71,7 +72,7 @@ namespace NPOI.SS.Formula
             _workbook = workbook;
             _evaluationListener = evaluationListener;
             _cache = new EvaluationCache(evaluationListener);
-            _sheetIndexesBySheet = new Dictionary<IEvaluationSheet, int>();
+            _sheetIndexesBySheet = new ConcurrentDictionary<IEvaluationSheet, int>();
             _sheetIndexesByName = new Dictionary<string, int>();
             _collaboratingWorkbookEnvironment = CollaboratingWorkbooksEnvironment.EMPTY;
             _workbookIx = 0;
