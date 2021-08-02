@@ -16,11 +16,11 @@ namespace NPOI.OpenXmlFormats.Spreadsheet
 
         private CT_Color bgColorField = null;
 
-        private ST_PatternType patternTypeField = ST_PatternType.none;
+        private ST_PatternType? patternTypeField=null;
 
         public bool IsSetPatternType()
         {
-            return this.patternTypeField != ST_PatternType.none;
+            return this.patternTypeField!=null&&this.patternTypeField != ST_PatternType.none;
         }
         public CT_Color AddNewFgColor()
         {
@@ -67,7 +67,8 @@ namespace NPOI.OpenXmlFormats.Spreadsheet
         internal void Write(StreamWriter sw, string nodeName)
         {
             sw.Write(string.Format("<{0}", nodeName));
-            XmlHelper.WriteAttribute(sw, "patternType", this.patternType.ToString());
+            if(patternType!=null)
+                XmlHelper.WriteAttribute(sw, "patternType", this.patternType.ToString());
             if (this.fgColor == null && this.bgColor == null)
             {
                 sw.Write("/>");
@@ -120,7 +121,7 @@ namespace NPOI.OpenXmlFormats.Spreadsheet
         }
 
         [XmlAttribute]
-        public ST_PatternType patternType
+        public ST_PatternType? patternType
         {
             get
             {
