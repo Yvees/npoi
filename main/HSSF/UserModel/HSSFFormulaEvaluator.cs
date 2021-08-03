@@ -25,6 +25,7 @@ namespace NPOI.HSSF.UserModel
     using NPOI.SS.Formula.UDF;
     using NPOI.SS.UserModel;
     using System.Collections.Generic;
+    using System.Threading.Tasks;
 
     /**
      * @author Amol S. Deshmukh &lt; amolweb at ya hoo dot com &gt;
@@ -179,6 +180,32 @@ namespace NPOI.HSSF.UserModel
             }
             throw new InvalidOperationException("Unexpected eval class (" + eval.GetType().Name + ")");
         }
+
+        protected override async Task<CellValue> EvaluateFormulaCellValueAsync(ICell cell)
+        {
+            ValueEval eval = await _bookEvaluator.EvaluateAsync(new HSSFEvaluationCell((HSSFCell)cell));
+            if (eval is BoolEval)
+            {
+                BoolEval be = (BoolEval)eval;
+                return CellValue.ValueOf(be.BooleanValue);
+            }
+            if (eval is NumberEval)
+            {
+                NumberEval ne = (NumberEval)eval;
+                return new CellValue(ne.NumberValue);
+            }
+            if (eval is StringEval)
+            {
+                StringEval ne = (StringEval)eval;
+                return new CellValue(ne.StringValue);
+            }
+            if (eval is ErrorEval)
+            {
+                return CellValue.GetError(((ErrorEval)eval).ErrorCode);
+            }
+            throw new InvalidOperationException("Unexpected eval class (" + eval.GetType().Name + ")");
+        }
+
         /**
          * If cell Contains formula, it Evaluates the formula, and
          *  puts the formula result back into the cell, in place
@@ -245,6 +272,5 @@ namespace NPOI.HSSF.UserModel
         {
             HSSFFormulaEvaluator.EvaluateAllFormulaCells(_book, this);
         }
-
     }
 }

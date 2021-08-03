@@ -44,7 +44,7 @@ namespace NPOI.SS.Formula
         {
             _cache = cache;
             _evaluationFrames = new ArrayList();
-            _currentlyEvaluatingCells = new ArrayList();
+            _currentlyEvaluatingCells = ArrayList.Synchronized(new ArrayList());
         }
 
         /**
@@ -157,6 +157,15 @@ namespace NPOI.SS.Formula
                     consumingFrame.AddSensitiveInputCell(cce);
                 }
             }
+        }
+
+        public bool IsEvaluating(FormulaCellCacheEntry cce)
+        {
+            if (cce == null)
+            {
+                throw new ArgumentException("cellLoc must not be null");
+            }
+            return _currentlyEvaluatingCells.Contains(cce);
         }
     }
 }

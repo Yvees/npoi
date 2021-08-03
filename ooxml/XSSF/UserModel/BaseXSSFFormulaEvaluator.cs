@@ -19,6 +19,7 @@ namespace NPOI.XSSF.UserModel
 {
     using System;
     using System.Collections.Generic;
+    using System.Threading.Tasks;
     using NPOI.SS.Formula;
     using NPOI.SS.Formula.Eval;
     using NPOI.SS.UserModel;
@@ -62,6 +63,32 @@ namespace NPOI.XSSF.UserModel
         {
             IEvaluationCell evalCell = ToEvaluationCell(cell);
             ValueEval eval = _bookEvaluator.Evaluate(evalCell);
+            if (eval is NumberEval)
+            {
+                NumberEval ne = (NumberEval)eval;
+                return new CellValue(ne.NumberValue);
+            }
+            if (eval is BoolEval)
+            {
+                BoolEval be = (BoolEval)eval;
+                return CellValue.ValueOf(be.BooleanValue);
+            }
+            if (eval is StringEval)
+            {
+                StringEval ne = (StringEval)eval;
+                return new CellValue(ne.StringValue);
+            }
+            if (eval is ErrorEval)
+            {
+                return CellValue.GetError(((ErrorEval)eval).ErrorCode);
+            }
+            throw new Exception("Unexpected eval class (" + eval.GetType().Name + ")");
+        }
+
+        protected override async Task<CellValue> EvaluateFormulaCellValueAsync(ICell cell)
+        {
+            IEvaluationCell evalCell = ToEvaluationCell(cell);
+            ValueEval eval = await _bookEvaluator.EvaluateAsync(evalCell);
             if (eval is NumberEval)
             {
                 NumberEval ne = (NumberEval)eval;

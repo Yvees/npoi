@@ -18,6 +18,8 @@
 namespace NPOI.SS.Formula
 {
     using System.Collections;
+    using System.Threading;
+    using System.Threading.Tasks;
     using NPOI.SS.Formula.Eval;
 
 
@@ -146,6 +148,18 @@ namespace NPOI.SS.Formula
                     RecurseClearCachedFormulaResults(evaluationListener);
                 }
             }
+        }
+
+        public async Task<ValueEval> GetValueAsync(EvaluationTracker tracker)
+        {
+            await Task.Run(() => {
+                while (tracker.IsEvaluating(this))
+                {
+                    Thread.Sleep(0);
+                }
+            });
+
+            return GetValue();
         }
     }
 }

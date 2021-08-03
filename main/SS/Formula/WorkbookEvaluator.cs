@@ -33,6 +33,7 @@ namespace NPOI.SS.Formula
     using NPOI.Util;
     using NPOI.SS.Formula.Function;
     using System.Collections.Concurrent;
+    using System.Threading.Tasks;
 
     /**
      * Evaluates formula cells.<p/>
@@ -260,6 +261,12 @@ namespace NPOI.SS.Formula
             return EvaluateAny(srcCell, sheetIndex, srcCell.RowIndex, srcCell.ColumnIndex, new EvaluationTracker(_cache));
         }
 
+        public async Task<ValueEval> EvaluateAsync(IEvaluationCell srcCell)
+        {
+            int sheetIndex = GetSheetIndex(srcCell.Sheet);
+            return await EvaluateAnyAsync(srcCell, sheetIndex, srcCell.RowIndex, srcCell.ColumnIndex, new EvaluationTracker(_cache));
+        }
+
 
         /**
          * @return never <c>null</c>, never {@link BlankEval}
@@ -286,7 +293,8 @@ namespace NPOI.SS.Formula
                 tracker.AcceptFormulaDependency(cce);
             }
             IEvaluationListener evalListener = _evaluationListener;
-            if (cce.GetValue() == null)
+            result = cce.GetValue();
+            if (result == null)
             {
                 if (!tracker.StartEvaluate(cce))
                 {
@@ -355,9 +363,9 @@ namespace NPOI.SS.Formula
             {
                 if (evalListener != null)
                 {
-                    evalListener.OnCacheHit(sheetIndex, rowIndex, columnIndex, cce.GetValue());
+                    evalListener.OnCacheHit(sheetIndex, rowIndex, columnIndex, result);
                 }
-                return cce.GetValue();
+                return result;
             }
             if (IsDebugLogEnabled())
             {
@@ -372,6 +380,121 @@ namespace NPOI.SS.Formula
             //return cce.GetValue();
             return result;
         }
+
+        private async Task<ValueEval> EvaluateAnyAsync(IEvaluationCell srcCell, int sheetIndex,
+                    int rowIndex, int columnIndex, EvaluationTracker tracker)
+        {
+            bool shouldCellDependencyBeRecorded = _stabilityClassifier == null ? true
+                    : !_stabilityClassifier.IsCellFinal(sheetIndex, rowIndex, columnIndex);
+            ValueEval result;
+            if (srcCell == null || srcCell.CellType != CellType.Formula)
+            {
+                result = GetValueFromNonFormulaCell(srcCell);
+                if (shouldCellDependencyBeRecorded)
+                {
+                    tracker.AcceptPlainValueDependency(_workbookIx, sheetIndex, rowIndex, columnIndex, result);
+                }
+                return result;
+            }
+
+            FormulaCellCacheEntry cce = _cache.GetOrCreateFormulaCellEntry(srcCell);
+            if (shouldCellDependencyBeRecorded || cce.IsInputSensitive)
+            {
+                tracker.AcceptFormulaDependency(cce);
+            }
+            IEvaluationListener evalListener = _evaluationListener;
+            result = cce.GetValue();
+            if (result == null)
+            {
+                if (tracker.IsEvaluating(cce))
+                {
+                    result = await cce.GetValueAsync(tracker);
+                }
+                if (!tracker.StartEvaluate(cce))
+                {
+                    return ErrorEval.CIRCULAR_REF_ERROR;
+                }
+                OperationEvaluationContext ec = new OperationEvaluationContext(this, _workbook, sheetIndex, rowIndex, columnIndex, tracker);
+
+                try
+                {
+                    Ptg[] ptgs = _workbook.GetFormulaTokens(srcCell);
+                    if (evalListener == null)
+                    {
+                        result = EvaluateFormula(ec, ptgs);
+                    }
+                    else
+                    {
+                        evalListener.OnStartEvaluate(srcCell, cce);
+                        result = EvaluateFormula(ec, ptgs);
+                        evalListener.OnEndEvaluate(cce, result);
+                    }
+
+                    tracker.UpdateCacheResult(result);
+                }
+                catch (NotImplementedException e)
+                {
+                    throw AddExceptionInfo(e, sheetIndex, rowIndex, columnIndex);
+                }
+                catch (RuntimeException re)
+                {
+                    if (re.InnerException is WorkbookNotFoundException && _ignoreMissingWorkbooks)
+                    {
+                        LogInfo(re.InnerException.Message + " - Continuing with cached value!");
+                        switch (srcCell.CachedFormulaResultType)
+                        {
+                            case CellType.Numeric:
+                                result = new NumberEval(srcCell.NumericCellValue);
+                                break;
+                            case CellType.String:
+                                result = new StringEval(srcCell.StringCellValue);
+                                break;
+                            case CellType.Blank:
+                                result = BlankEval.instance;
+                                break;
+                            case CellType.Boolean:
+                                result = BoolEval.ValueOf(srcCell.BooleanCellValue);
+                                break;
+                            case CellType.Error:
+                                result = ErrorEval.ValueOf(srcCell.ErrorCellValue);
+                                break;
+                            case CellType.Formula:
+                            default:
+                                throw new RuntimeException("Unexpected cell type '" + srcCell.CellType + "' found!");
+                        }
+                    }
+                    else
+                    {
+                        throw re;
+                    }
+                }
+                finally
+                {
+                    tracker.EndEvaluate(cce);
+                }
+            }
+            else
+            {
+                if (evalListener != null)
+                {
+                    evalListener.OnCacheHit(sheetIndex, rowIndex, columnIndex, result);
+                }
+                return result;
+            }
+            if (IsDebugLogEnabled())
+            {
+                String sheetName = GetSheetName(sheetIndex);
+                CellReference cr = new CellReference(rowIndex, columnIndex);
+                LogDebug("Evaluated " + sheetName + "!" + cr.FormatAsString() + " To " + cce.GetValue());
+            }
+            // Usually (result === cce.getValue())
+            // But sometimes: (result==ErrorEval.CIRCULAR_REF_ERROR, cce.getValue()==null)
+            // When circular references are detected, the cache entry is only updated for
+            // the top evaluation frame
+            //return cce.GetValue();
+            return result;
+        }
+
         /**
          * Adds the current cell reference to the exception for easier debugging.
          * Would be nice to get the formula text as well, but that seems to require

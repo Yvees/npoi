@@ -19,6 +19,7 @@ namespace NPOI.SS.Formula
 {
     using System;
     using System.Collections.Generic;
+    using System.Threading.Tasks;
     using NPOI.SS.UserModel;
     using NPOI.Util;
 
@@ -114,6 +115,32 @@ namespace NPOI.SS.Formula
             }
         }
 
+        public async Task<CellValue> EvaluateAsync(ICell cell)
+        {
+            if (cell == null)
+            {
+                return null;
+            }
+
+            switch (cell.CellType)
+            {
+                case CellType.Boolean:
+                    return CellValue.ValueOf(cell.BooleanCellValue);
+                case CellType.Error:
+                    return CellValue.GetError(cell.ErrorCellValue);
+                case CellType.Formula:
+                    return await EvaluateFormulaCellValueAsync(cell);
+                case CellType.Numeric:
+                    return new CellValue(cell.NumericCellValue);
+                case CellType.String:
+                    return new CellValue(cell.RichStringCellValue.String);
+                case CellType.Blank:
+                    return null;
+                default:
+                    throw new InvalidOperationException("Bad cell type (" + cell.CellType + ")");
+            }
+        }
+
         /**
          * If cell Contains formula, it Evaluates the formula, and
          *  Puts the formula result back into the cell, in place
@@ -149,6 +176,7 @@ namespace NPOI.SS.Formula
         }
 
         protected abstract CellValue EvaluateFormulaCellValue(ICell cell);
+        protected abstract Task<CellValue> EvaluateFormulaCellValueAsync(ICell cell);
 
         /**
          * If cell Contains formula, it Evaluates the formula, and saves the result of the formula. The
