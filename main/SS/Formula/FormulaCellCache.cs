@@ -36,7 +36,7 @@ namespace NPOI.SS.Formula
         public FormulaCellCache()
         {
             // assumes HSSFCell does not override HashCode or Equals, otherwise we need IdentityHashMap
-            _formulaEntriesByCell = new Hashtable();
+            _formulaEntriesByCell = Hashtable.Synchronized(new Hashtable());
         }
 
         public CellCacheEntry[] GetCacheEntries()
