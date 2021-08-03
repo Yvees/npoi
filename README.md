@@ -13,15 +13,17 @@ Get Started with NPOI
 
 [How to use NPOI on Linux](https://github.com/nissl-lab/npoi/wiki/How-to-use-NPOI-on-Linux)
 
+[ORM on NPOI](https://github.com/nissl-lab/npoi/wiki/ORM-on-NPOI)
+
 [Stop using Dotnetcore/NPOI nuget package. It’s obsolete!](https://tonyqus.medium.com/stop-using-dotnetcore-npoi-nuget-package-its-too-obsolete-6d0aeedb3319)
 
-Contributors
-============
-Big thanks to all [NPOI contributors](https://github.com/nissl-lab/npoi/wiki/NPOI-Contributors)!!! 
+[中国哪些公司在用.NET](https://github.com/dotnet-cn/jobs)
+
+[DotnetCore.NPOI的前世今生](https://github.com/nissl-lab/npoi/wiki/DotNetCore.NPOI的前世今生)
 
 Donation
 =========
-If this project help you reduce time to develop, you can give me a cup of beer 🍺 [![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://www.paypal.com/paypalme/tonyqus/10)
+If this project help you reduce time to develop, you can give me a cup of beer 🍺 [![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://www.paypal.com/paypalme/tonyqus/5)
 
 Telegram User Group
 ================
@@ -43,7 +45,7 @@ e. Support not only export but also import
 
 f. Real successful cases all over the world
 
-g. [huge amout of basic examples](https://github.com/nissl-lab/npoi-examples)
+g. [huge amount of basic examples](https://github.com/nissl-lab/npoi-examples)
 
 h. Works on both Windows and Linux 
 
