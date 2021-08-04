@@ -59,7 +59,7 @@ namespace NPOI.XSSF.UserModel
             // cache for performance: ~30% speedup due to caching
             if (_cellCache == null)
             {
-                _cellCache = new ConcurrentDictionary<CellKey, IEvaluationCell>(Environment.ProcessorCount, _xs.LastRowNum * 3);
+                _cellCache = new ConcurrentDictionary<CellKey, IEvaluationCell>(Environment.ProcessorCount * 2, _xs.LastRowNum * 3);
                 foreach (IRow row in _xs)
                 {
                     int rowNum = row.RowNum;
