@@ -74,11 +74,14 @@ namespace NPOI.XSSF.UserModel
             // the underlying workbook after the EvaluationWorkbook is created.
             if (_sheetCache == null)
             {
-                int numberOfSheets = _uBook.NumberOfSheets;
-                _sheetCache = new XSSFEvaluationSheet[numberOfSheets];
-                for (int i = 0; i < numberOfSheets; i++)
+                lock (this)
                 {
-                    _sheetCache[i] = new XSSFEvaluationSheet(_uBook.GetSheetAt(i));
+                    int numberOfSheets = _uBook.NumberOfSheets;
+                    _sheetCache = new XSSFEvaluationSheet[numberOfSheets];
+                    for (int i = 0; i < numberOfSheets; i++)
+                    {
+                        _sheetCache[i] = new XSSFEvaluationSheet(_uBook.GetSheetAt(i));
+                    }
                 }
             }
             if (sheetIndex < 0 || sheetIndex >= _sheetCache.Length)
